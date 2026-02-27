@@ -51,6 +51,10 @@ async def scrape_page(url: str, *, timeout_ms: int = 45000) -> dict:
             await browser.close()
 
 
+def scrape_page_sync(url: str, *, timeout_ms: int = 45000) -> dict:
+    return asyncio.run(scrape_page(url, timeout_ms=timeout_ms))
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Super simple Playwright scraper: extract page text + image URLs to JSON."

@@ -8,8 +8,21 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def fetch_html(url: str, timeout: int = 15) -> str:
-    response = requests.get(url, timeout=timeout)
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; URLValidatorBot/1.0; +https://example.com/bot)"
+}
+
+
+def normalize_url(raw: str) -> str:
+    raw = raw.strip()
+    parsed = urlparse(raw)
+    if parsed.scheme:
+        return raw
+    return f"https://{raw}"
+
+
+def fetch_html(url: str, timeout: int = 15, headers: Dict[str, str] | None = None) -> str:
+    response = requests.get(url, timeout=timeout, headers=headers or DEFAULT_HEADERS)
     response.raise_for_status()
     return response.text
 
@@ -54,6 +67,12 @@ def parse_page(html: str, base_url: str) -> Dict[str, Any]:
     }
 
 
+def scrape_static(url: str, timeout: int = 15) -> Dict[str, Any]:
+    normalized = normalize_url(url)
+    html = fetch_html(normalized, timeout=timeout)
+    return parse_page(html, normalized)
+
+
 def derive_output_filename(url: str) -> Path:
     parsed = urlparse(url)
     host = parsed.netloc or "output"
@@ -82,11 +101,9 @@ def main() -> None:
     url: str = args.url
 
     try:
-        html = fetch_html(url)
+        data = scrape_static(url)
     except requests.RequestException as exc:
         raise SystemExit(f"Failed to fetch '{url}': {exc}")
-
-    data = parse_page(html, url)
 
     if args.output:
         output_path = Path(args.output)

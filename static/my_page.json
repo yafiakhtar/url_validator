@@ -1,0 +1,35 @@
+{
+  "url": "https://www.yafiakhtar.me/",
+  "title": "yafi",
+  "text": [
+    "hey i'm yafi",
+    "i'm a junior at penn state studying cs and math and learning a bunch more stuff. i love playing soccer \n                    and bouldering. apart from that i still continue to build and design fun things and love understanding \n                    things i don't understand.",
+    "i'm interested in full-stack development and ai/ml. i'm currently learning and working on research with \n                    fine-tuning models and reinforcement learning. over the summer, i interned at jade global as a full-stack developer and made an internal tool to help with getting leads with the help of snowflake. \n                    i'm also a learning assistant for a computer architecture class which is pretty nice.",
+    "Welcome to my corner of the internet.",
+    "life so far...",
+    "cse learning assistant",
+    "computer architecture class learning assistant",
+    "swe intern @ jade global",
+    "full-stack development with snowflake",
+    "developed an internal tool to help get leads with over 50k job records",
+    "built an ai chatbot with snowflake cortex assisting in getting analysis of job postings helping find relevant leads",
+    "research assistant @ penn state",
+    "helped with development of video query system for students to search for specific parts in recorded lectures",
+    "penn state",
+    "started learning and building things",
+    "got interested in cs and math",
+    "met really smart people and traveled to different places with friends",
+    "Please feel free to reach out at yafi [at] psu [dot] edu",
+    "built with care in jubail · v2.0.0"
+  ],
+  "images": [
+    {
+      "src": "https://www.yafiakhtar.me/yafi.jpg",
+      "alt": "Yafi"
+    },
+    {
+      "src": "https://www.yafiakhtar.me/yafi2.jpg",
+      "alt": ""
+    }
+  ]
+}

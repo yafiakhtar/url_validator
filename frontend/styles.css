@@ -1,0 +1,197 @@
+:root {
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --border: #e0e0e0;
+  --input-bg: #fff;
+  --input-border: #e0e0e0;
+  --button-bg: #1a1a1a;
+  --button-text: #fff;
+  --error: #c00;
+  --safe: #0a0;
+  --risk: #c00;
+  --alert-bg: #fff5f5;
+  --alert-border: #f2c0c0;
+  --alert-title: #900;
+}
+[data-theme="dark"] {
+  --bg: #111;
+  --text: #e8e8e8;
+  --text-muted: #999;
+  --border: #333;
+  --input-bg: #1a1a1a;
+  --input-border: #333;
+  --button-bg: #e8e8e8;
+  --button-text: #111;
+  --error: #f66;
+  --safe: #6c6;
+  --risk: #f66;
+  --alert-bg: #2a1515;
+  --alert-border: #522;
+  --alert-title: #f88;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.header-title {
+  font-family: "Lora", serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin: 0;
+}
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--text);
+  width: 2.25rem;
+  height: 2.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.theme-toggle:hover { opacity: 0.7; }
+.theme-toggle svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 3rem;
+}
+.form-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 520px;
+}
+.form-row input[type="url"] {
+  flex: 1;
+  min-width: 0;
+  height: 2.75rem;
+  padding: 0 0.875rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.form-row input[type="url"]::placeholder { color: var(--text-muted); }
+.form-row input[type="url"]:focus {
+  outline: none;
+  border-color: var(--text-muted);
+}
+.form-row select {
+  height: 2.75rem;
+  padding: 0 0.875rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  min-width: 6rem;
+}
+.form-row .add-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.form-row .add-btn:hover { opacity: 0.9; }
+
+.error {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--error);
+  text-align: center;
+}
+
+.below {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 2rem;
+}
+.alerts {
+  border: 1px solid var(--alert-border);
+  background: var(--alert-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.alerts h2 { margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 500; color: var(--alert-title); }
+.alerts ul { list-style: none; padding: 0; margin: 0; }
+.alerts li { font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text); }
+
+.jobs-section-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem 0;
+  letter-spacing: 0.02em;
+}
+.jobs { list-style: none; padding: 0; margin: 0; }
+.job {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.job .url { font-size: 0.9rem; font-weight: 500; word-break: break-all; color: var(--text); }
+.job .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+.job .result { margin-top: 0.5rem; font-size: 0.85rem; }
+.job .result.safe { color: var(--safe); }
+.job .result.risk { color: var(--risk); }
+.job .actions { margin-top: 0.75rem; }
+.job .actions button {
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.job .actions button:hover { opacity: 0.9; }
+.empty { color: var(--text-muted); font-size: 0.9rem; }

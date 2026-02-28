@@ -6,6 +6,7 @@ from typing import List
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import SETTINGS
 from app.db import execute, fetch_all, fetch_one, init_db, parse_json
@@ -29,7 +30,8 @@ def on_shutdown() -> None:
     scheduler.shutdown()
 
 
-_UI_PATH = Path(__file__).resolve().parent.parent / "frontend" / "index.html"
+_FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+_UI_PATH = _FRONTEND_DIR / "index.html"
 
 
 @app.get("/")
@@ -40,6 +42,9 @@ def serve_ui() -> FileResponse:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+app.mount("/static", StaticFiles(directory=str(_FRONTEND_DIR)), name="static")
 
 
 @app.post("/jobs", response_model=JobOut)

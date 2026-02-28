@@ -45,4 +45,5 @@ class RunOut(BaseModel):
     flags: Optional[list[str]]
     evidence: Optional[Any]
     raw_hash: Optional[str]
+    risk_at: Optional[str]
     error: Optional[str]

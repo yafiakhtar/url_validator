@@ -42,6 +42,7 @@ def init_db() -> None:
                 flags TEXT,
                 evidence TEXT,
                 raw_hash TEXT,
+                risk_at TEXT,
                 error TEXT,
                 FOREIGN KEY(job_id) REFERENCES jobs(id)
             );
@@ -49,17 +50,33 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS job_state (
                 job_id TEXT PRIMARY KEY,
                 last_hash TEXT,
+                last_risk_level TEXT,
+                last_flags TEXT,
+                last_evidence TEXT,
+                last_risk_at TEXT,
                 last_notified_at TEXT,
                 FOREIGN KEY(job_id) REFERENCES jobs(id)
             );
             """
         )
+        _ensure_column(conn, "runs", "risk_at", "TEXT")
+        _ensure_column(conn, "job_state", "last_risk_level", "TEXT")
+        _ensure_column(conn, "job_state", "last_flags", "TEXT")
+        _ensure_column(conn, "job_state", "last_evidence", "TEXT")
+        _ensure_column(conn, "job_state", "last_risk_at", "TEXT")
 
 
 def _connect() -> sqlite3.Connection:
     conn = sqlite3.connect(SETTINGS.db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, col_type: str) -> None:
+    cur = conn.execute(f"PRAGMA table_info({table})")
+    columns = {row[1] for row in cur.fetchall()}
+    if column not in columns:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
 
 
 @contextmanager

@@ -66,10 +66,13 @@ function renderResult(run) {
 function renderJob(job, latestRun) {
   const { html: resultHtml } = renderResult(latestRun);
   const intervalLabel = frequencyLabels[job.interval_seconds] || `${job.interval_seconds}s`;
+  const lastChecked = latestRun && latestRun.finished_at ? formatTimestamp(latestRun.finished_at) : "—";
+  const detectedAt = latestRun && latestRun.risk_at ? formatTimestamp(latestRun.risk_at) : "";
   return `
     <li class="job" data-job-id="${job.id}">
       <div class="url">${escapeHtml(job.url)}</div>
       <div class="meta">Every ${intervalLabel} · ${job.status}</div>
+      <div class="meta">Last checked: ${escapeHtml(lastChecked)}${detectedAt ? " · Detected: " + escapeHtml(detectedAt) : ""}</div>
       <div class="result">${resultHtml}</div>
       <div class="actions">
         <button type="button" data-action="run">Run now</button>
@@ -83,6 +86,13 @@ function escapeHtml(s) {
   const div = document.createElement("div");
   div.textContent = s;
   return div.innerHTML;
+}
+
+function formatTimestamp(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString();
 }
 
 async function loadJobs() {
@@ -106,7 +116,8 @@ async function loadJobs() {
           alerts.push({
             url: job.url,
             flags,
-            finished_at: run.finished_at || ""
+            finished_at: run.finished_at || "",
+            risk_at: run.risk_at || ""
           });
         }
         return renderJob(job, run);
@@ -117,7 +128,7 @@ async function loadJobs() {
       alertListEl.innerHTML = alerts
         .map(
           (item) =>
-            `<li><strong>${escapeHtml(item.url)}</strong> — ${escapeHtml(item.flags)} ${item.finished_at ? "· " + escapeHtml(item.finished_at) : ""}</li>`
+            `<li><strong>${escapeHtml(item.url)}</strong> — ${escapeHtml(item.flags)}${item.risk_at ? " · Detected: " + escapeHtml(formatTimestamp(item.risk_at)) : ""}${item.finished_at ? " · Last checked: " + escapeHtml(formatTimestamp(item.finished_at)) : ""}</li>`
         )
         .join("");
       alertsEl.style.display = "block";

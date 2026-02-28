@@ -50,23 +50,29 @@ def run_job(job_id: str) -> Dict[str, Any]:
 
         if last_hash == raw_hash:
             finished_at = utc_now()
+            last_risk_level = state_row["last_risk_level"] if state_row else None
+            last_flags = parse_json(state_row["last_flags"]) if state_row else []
+            last_evidence = parse_json(state_row["last_evidence"]) if state_row else []
+            last_risk_at = state_row["last_risk_at"] if state_row else None
+            risk_level = last_risk_level or "none"
             execute(
                 """
                 UPDATE runs
-                SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?
+                SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?
                 WHERE id = ?
                 """,
                 (
                     finished_at,
                     "success",
-                    "none",
-                    insert_json([]),
-                    insert_json([]),
+                    risk_level,
+                    insert_json(last_flags or []),
+                    insert_json(last_evidence or []),
                     raw_hash,
+                    last_risk_at,
                     run_id,
                 ),
             )
-            return {"status": "success", "run_id": run_id, "risk_level": "none"}
+            return {"status": "success", "run_id": run_id, "risk_level": risk_level}
 
         analysis = analyze_content(job["url"], text_lines, images)
         risk_level = analysis.get("risk_level", "none")
@@ -74,10 +80,11 @@ def run_job(job_id: str) -> Dict[str, Any]:
         evidence = analysis.get("evidence", [])
 
         finished_at = utc_now()
+        risk_at = finished_at if risk_level in ("low", "high") else None
         execute(
             """
             UPDATE runs
-            SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?
+            SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?
             WHERE id = ?
             """,
             (
@@ -87,19 +94,42 @@ def run_job(job_id: str) -> Dict[str, Any]:
                 insert_json(flags),
                 insert_json(evidence),
                 raw_hash,
+                risk_at,
                 run_id,
             ),
         )
 
         if state_row:
             execute(
-                "UPDATE job_state SET last_hash = ?, last_notified_at = last_notified_at WHERE job_id = ?",
-                (raw_hash, job_id),
+                """
+                UPDATE job_state
+                SET last_hash = ?, last_risk_level = ?, last_flags = ?, last_evidence = ?, last_risk_at = ?
+                WHERE job_id = ?
+                """,
+                (
+                    raw_hash,
+                    risk_level if risk_level in ("low", "high") else None,
+                    insert_json(flags) if risk_level in ("low", "high") else None,
+                    insert_json(evidence) if risk_level in ("low", "high") else None,
+                    risk_at,
+                    job_id,
+                ),
             )
         else:
             execute(
-                "INSERT INTO job_state (job_id, last_hash, last_notified_at) VALUES (?, ?, ?)",
-                (job_id, raw_hash, None),
+                """
+                INSERT INTO job_state (job_id, last_hash, last_risk_level, last_flags, last_evidence, last_risk_at, last_notified_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    job_id,
+                    raw_hash,
+                    risk_level if risk_level in ("low", "high") else None,
+                    insert_json(flags) if risk_level in ("low", "high") else None,
+                    insert_json(evidence) if risk_level in ("low", "high") else None,
+                    risk_at,
+                    None,
+                ),
             )
 
         if risk_level in ("low", "high") and job.get("webhook_url"):

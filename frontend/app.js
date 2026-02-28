@@ -71,8 +71,10 @@ function renderJob(job, latestRun) {
   return `
     <li class="job" data-job-id="${job.id}">
       <div class="url">${escapeHtml(job.url)}</div>
-      <div class="meta">Every ${intervalLabel} · ${job.status}</div>
-      <div class="meta">Last checked: ${escapeHtml(lastChecked)}${detectedAt ? " · Detected: " + escapeHtml(detectedAt) : ""}</div>
+      <div class="meta">Frequency: ${escapeHtml(intervalLabel)}</div>
+      <div class="meta">Status: ${escapeHtml(job.status)}</div>
+      <div class="meta">Last checked: ${escapeHtml(lastChecked)}</div>
+      ${detectedAt ? `<div class="meta">Detected: ${escapeHtml(detectedAt)}</div>` : ""}
       <div class="result">${resultHtml}</div>
       <div class="actions">
         <button type="button" data-action="run">Run now</button>
@@ -128,7 +130,12 @@ async function loadJobs() {
       alertListEl.innerHTML = alerts
         .map(
           (item) =>
-            `<li><strong>${escapeHtml(item.url)}</strong> — ${escapeHtml(item.flags)}${item.risk_at ? " · Detected: " + escapeHtml(formatTimestamp(item.risk_at)) : ""}${item.finished_at ? " · Last checked: " + escapeHtml(formatTimestamp(item.finished_at)) : ""}</li>`
+            `<li>
+              <strong>${escapeHtml(item.url)}</strong>
+              <div>Flagged content: ${escapeHtml(item.flags)}</div>
+              ${item.risk_at ? `<div>Detected: ${escapeHtml(formatTimestamp(item.risk_at))}</div>` : ""}
+              ${item.finished_at ? `<div>Last checked: ${escapeHtml(formatTimestamp(item.finished_at))}</div>` : ""}
+            </li>`
         )
         .join("");
       alertsEl.style.display = "block";

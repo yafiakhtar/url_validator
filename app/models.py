@@ -14,7 +14,7 @@ class JobCreate(BaseModel):
     url: HttpUrl
     interval_seconds: int = Field(ge=30, le=60 * 60 * 24)
     mode: JobMode = "auto"
-    webhook_url: HttpUrl
+    webhook_url: Optional[HttpUrl] = None
 
 
 class JobUpdate(BaseModel):

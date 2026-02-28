@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 from typing import List
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.responses import FileResponse
 
+from app.config import SETTINGS
 from app.db import execute, fetch_all, fetch_one, init_db, parse_json
 from app.models import JobCreate, JobOut, JobUpdate, RunOut
 from app.runner import run_job
@@ -26,6 +29,14 @@ def on_shutdown() -> None:
     scheduler.shutdown()
 
 
+_UI_PATH = Path(__file__).resolve().parent.parent / "frontend" / "index.html"
+
+
+@app.get("/")
+def serve_ui() -> FileResponse:
+    return FileResponse(_UI_PATH)
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
@@ -35,6 +46,13 @@ def health() -> dict:
 def create_job(payload: JobCreate) -> JobOut:
     job_id = str(uuid.uuid4())
     now = utc_now()
+    webhook_url = (
+        str(payload.webhook_url)
+        if payload.webhook_url is not None
+        else SETTINGS.default_webhook_url
+    )
+    if webhook_url is None:
+        webhook_url = ""
     execute(
         """
         INSERT INTO jobs (id, url, interval_seconds, mode, webhook_url, status, created_at, updated_at)
@@ -45,7 +63,7 @@ def create_job(payload: JobCreate) -> JobOut:
             str(payload.url),
             payload.interval_seconds,
             payload.mode,
-            str(payload.webhook_url),
+            webhook_url or "",
             "active",
             now,
             now,

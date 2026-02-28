@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Risk Monitor</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+    h1 { margin-top: 0; }
+    .form { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1.5rem; }
+    .form label { display: block; font-size: 0.875rem; margin-bottom: 0.25rem; }
+    .form input[type="url"] { width: 280px; padding: 0.5rem 0.75rem; }
+    .form select { padding: 0.5rem 0.75rem; min-width: 120px; }
+    .form button { padding: 0.5rem 1rem; cursor: pointer; }
+    .error { color: #c00; margin-bottom: 1rem; }
+    .jobs { list-style: none; padding: 0; margin: 0; }
+    .job { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+    .job .url { font-weight: 500; word-break: break-all; }
+    .job .meta { font-size: 0.875rem; color: #666; margin-top: 0.25rem; }
+    .job .result { margin-top: 0.5rem; font-size: 0.875rem; }
+    .job .result.safe { color: #0a0; }
+    .job .result.risk { color: #c00; }
+    .job .actions { margin-top: 0.75rem; }
+    .job .actions button { margin-right: 0.5rem; padding: 0.35rem 0.75rem; font-size: 0.875rem; cursor: pointer; }
+    .job .flags { font-size: 0.8rem; color: #666; margin-top: 0.25rem; }
+    .empty { color: #666; }
+    .alerts { border: 1px solid #f2c0c0; background: #fff7f7; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    .alerts h2 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #900; }
+    .alerts ul { list-style: none; padding: 0; margin: 0; }
+    .alerts li { font-size: 0.9rem; margin-bottom: 0.35rem; }
+  </style>
+</head>
+<body>
+  <h1>URL Risk Monitor</h1>
+  <p>Enter a URL and how often to check it. Results show whether the page is safe or has risk content.</p>
+
+  <form class="form" id="createForm">
+    <div>
+      <label for="url">URL</label>
+      <input type="url" id="url" name="url" placeholder="https://example.com" required />
+    </div>
+    <div>
+      <label for="frequency">Check every</label>
+      <select id="frequency" name="frequency">
+        <option value="300">5 minutes</option>
+        <option value="900">15 minutes</option>
+        <option value="3600">1 hour</option>
+        <option value="21600">6 hours</option>
+        <option value="86400">24 hours</option>
+      </select>
+    </div>
+    <div>
+      <button type="submit">Add job</button>
+    </div>
+  </form>
+
+  <p id="error" class="error" style="display: none;"></p>
+
+  <div id="alerts" style="display:none;" class="alerts">
+    <h2>Alerts</h2>
+    <ul id="alertList"></ul>
+  </div>
+
+  <h2>Jobs</h2>
+  <ul class="jobs" id="jobList"></ul>
+
+  <script>
+    const frequencyLabels = {
+      300: "5 min",
+      900: "15 min",
+      3600: "1 h",
+      21600: "6 h",
+      86400: "24 h"
+    };
+
+    function showError(msg) {
+      const el = document.getElementById("error");
+      el.textContent = msg;
+      el.style.display = msg ? "block" : "none";
+    }
+
+    async function api(path, options = {}) {
+      const res = await fetch(path, {
+        ...options,
+        headers: { "Content-Type": "application/json", ...options.headers },
+        ...(options.body && { body: JSON.stringify(options.body) })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) return res.json();
+      return res.text();
+    }
+
+    async function loadRuns(jobId) {
+      const runs = await api(`/jobs/${jobId}/runs`);
+      return runs[0] || null;
+    }
+
+    function renderResult(run) {
+      if (!run) return { html: '<span class="empty">No runs yet</span>', risk: null };
+      if (run.status === "running") {
+        return { html: '<span class="result">Loading</span>', risk: "loading" };
+      }
+      const risk = run.risk_level || "none";
+      if (risk === "none") {
+        return { html: '<span class="result safe">Safe</span>', risk };
+      }
+      const flags = (run.flags && run.flags.length) ? ` (${run.flags.join(", ")})` : "";
+      return { html: `<span class="result risk">Rescue${flags}</span>`, risk };
+    }
+
+    function renderJob(job, latestRun) {
+      const { html: resultHtml } = renderResult(latestRun);
+      const intervalLabel = frequencyLabels[job.interval_seconds] || `${job.interval_seconds}s`;
+      return `
+        <li class="job" data-job-id="${job.id}">
+          <div class="url">${escapeHtml(job.url)}</div>
+          <div class="meta">Every ${intervalLabel} · ${job.status}</div>
+          <div class="result">${resultHtml}</div>
+          <div class="actions">
+            <button type="button" data-action="run">Run now</button>
+            <button type="button" data-action="delete">Delete</button>
+          </div>
+        </li>
+      `;
+    }
+
+    function escapeHtml(s) {
+      const div = document.createElement("div");
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    async function loadJobs() {
+      showError("");
+      const listEl = document.getElementById("jobList");
+      const alertsEl = document.getElementById("alerts");
+      const alertListEl = document.getElementById("alertList");
+      try {
+        const jobs = await api("/jobs");
+        if (jobs.length === 0) {
+          listEl.innerHTML = '<li class="empty">No jobs yet. Add one above.</li>';
+          alertsEl.style.display = "none";
+          return;
+        }
+        const alerts = [];
+        const html = await Promise.all(
+          jobs.map(async (job) => {
+            const run = await loadRuns(job.id);
+            if (run && run.risk_level && run.risk_level !== "none") {
+              const flags = (run.flags && run.flags.length) ? run.flags.join(", ") : "risk detected";
+              alerts.push({
+                url: job.url,
+                flags,
+                finished_at: run.finished_at || ""
+              });
+            }
+            return renderJob(job, run);
+          })
+        );
+        listEl.innerHTML = html.join("");
+        if (alerts.length) {
+          alertListEl.innerHTML = alerts
+            .map(
+              (item) =>
+                `<li><strong>${escapeHtml(item.url)}</strong> — ${escapeHtml(item.flags)} ${item.finished_at ? "· " + escapeHtml(item.finished_at) : ""}</li>`
+            )
+            .join("");
+          alertsEl.style.display = "block";
+        } else {
+          alertsEl.style.display = "none";
+          alertListEl.innerHTML = "";
+        }
+        listEl.querySelectorAll(".job").forEach((node) => {
+          const jobId = node.dataset.jobId;
+          node.querySelector('[data-action="run"]').addEventListener("click", () => runNow(jobId));
+          node.querySelector('[data-action="delete"]').addEventListener("click", () => deleteJob(jobId));
+        });
+      } catch (e) {
+        showError("Failed to load jobs: " + e.message);
+        listEl.innerHTML = "";
+      }
+    }
+
+    async function runNow(jobId) {
+      showError("");
+      try {
+        await api(`/jobs/${jobId}/run`, { method: "POST" });
+        await loadJobs();
+      } catch (e) {
+        showError("Run now failed: " + e.message);
+      }
+    }
+
+    async function deleteJob(jobId) {
+      showError("");
+      try {
+        await api(`/jobs/${jobId}`, { method: "DELETE" });
+        await loadJobs();
+      } catch (e) {
+        showError("Delete failed: " + e.message);
+      }
+    }
+
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showError("");
+      const url = document.getElementById("url").value.trim();
+      const interval_seconds = parseInt(document.getElementById("frequency").value, 10);
+      try {
+        await api("/jobs", {
+          method: "POST",
+          body: {
+            url: url.startsWith("http") ? url : "https://" + url,
+            interval_seconds,
+            mode: "auto",
+            // Use server-side DEFAULT_WEBHOOK_URL
+          }
+        });
+        document.getElementById("url").value = "";
+        await loadJobs();
+      } catch (e) {
+        showError("Failed to create job: " + e.message);
+      }
+    });
+
+    loadJobs();
+    setInterval(loadJobs, 15000);
+  </script>
+</body>
+</html>

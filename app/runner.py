@@ -102,7 +102,7 @@ def run_job(job_id: str) -> Dict[str, Any]:
                 (job_id, raw_hash, None),
             )
 
-        if risk_level in ("low", "high"):
+        if risk_level in ("low", "high") and job.get("webhook_url"):
             payload = {
                 "job_id": job_id,
                 "run_id": run_id,

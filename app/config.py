@@ -14,6 +14,7 @@ class Settings:
     db_path: Path = Path(os.environ.get("DB_PATH", "./data/app.db"))
     claude_api_key: str = os.environ.get("CLAUDE_API_KEY", "")
     anthropic_model: str = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+    default_webhook_url: str = os.environ.get("DEFAULT_WEBHOOK_URL", "")
     max_text_chars: int = int(os.environ.get("MAX_TEXT_CHARS", "12000"))
     max_images: int = int(os.environ.get("MAX_IMAGES", "8"))
     max_image_bytes: int = int(os.environ.get("MAX_IMAGE_BYTES", str(2 * 1024 * 1024)))

@@ -60,7 +60,7 @@ function renderResult(run) {
     return { html: '<span class="result safe">Safe</span>', risk };
   }
   const flags = (run.flags && run.flags.length) ? ` (${run.flags.join(", ")})` : "";
-  return { html: `<span class="result risk">Rescue${flags}</span>`, risk };
+  return { html: `<span class="result risk">Risk;${flags}</span>`, risk };
 }
 
 function renderJob(job, latestRun) {

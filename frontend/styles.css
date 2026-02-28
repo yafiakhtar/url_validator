@@ -88,45 +88,58 @@ body {
 }
 .form-row {
   display: flex;
-  align-items: stretch;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0;
   width: 100%;
   max-width: 520px;
+  height: 2.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  overflow: hidden;
 }
 .form-row input[type="url"] {
   flex: 1;
   min-width: 0;
-  height: 2.75rem;
-  padding: 0 0.875rem;
+  height: 100%;
+  padding: 0 1rem;
+  margin: 0;
   font-size: 0.9rem;
   font-family: inherit;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  background: var(--input-bg);
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
 }
 .form-row input[type="url"]::placeholder { color: var(--text-muted); }
 .form-row input[type="url"]:focus {
   outline: none;
-  border-color: var(--text-muted);
 }
 .form-row select {
-  height: 2.75rem;
-  padding: 0 0.875rem;
+  height: 100%;
+  margin: 0;
+  padding: 0 2rem 0 1rem;
   font-size: 0.9rem;
   font-family: inherit;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  background: var(--input-bg);
+  border: none;
+  border-left: 1px solid var(--input-border);
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
-  min-width: 6rem;
+  min-width: 5.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
 }
 .form-row .add-btn {
   width: 2.75rem;
-  height: 2.75rem;
+  height: 100%;
   flex-shrink: 0;
   border: none;
-  border-radius: 8px;
+  border-left: 1px solid var(--input-border);
+  border-radius: 0;
   background: var(--button-bg);
   color: var(--button-text);
   font-size: 1.25rem;
@@ -172,24 +185,24 @@ body {
 .jobs { list-style: none; padding: 0; margin: 0; }
 .job {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.875rem 1rem;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
 }
 .job .url { font-size: 0.9rem; font-weight: 500; word-break: break-all; color: var(--text); }
-.job .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
-.job .result { margin-top: 0.5rem; font-size: 0.85rem; }
+.job .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+.job .result { margin-top: 0.4rem; font-size: 0.85rem; }
 .job .result.safe { color: var(--safe); }
 .job .result.risk { color: var(--risk); }
-.job .actions { margin-top: 0.75rem; }
+.job .actions { margin-top: 0.65rem; }
 .job .actions button {
   margin-right: 0.5rem;
-  padding: 0.3rem 0.6rem;
+  padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   cursor: pointer;
   font-family: inherit;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--input-bg);
   color: var(--text);
 }

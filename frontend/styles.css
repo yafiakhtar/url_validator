@@ -177,13 +177,30 @@ body {
 .alerts ul { list-style: none; padding: 0; margin: 0; }
 .alerts li { font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text); }
 
+.jobs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 0.75rem 0;
+}
 .jobs-section-title {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-muted);
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   letter-spacing: 0.02em;
 }
+.clear-btn {
+  font-size: 0.75rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+}
+.clear-btn:hover { opacity: 0.9; }
 .jobs { list-style: none; padding: 0; margin: 0; }
 .job {
   border: 1px solid var(--border);

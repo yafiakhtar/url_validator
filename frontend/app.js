@@ -209,5 +209,17 @@ document.getElementById("createForm").addEventListener("submit", async (e) => {
   }
 });
 
+document.getElementById("clearAll").addEventListener("click", async () => {
+  showError("");
+  if (!confirm("Clear all jobs? This cannot be undone.")) return;
+  try {
+    const jobs = await api("/jobs");
+    await Promise.all(jobs.map((job) => api(`/jobs/${job.id}`, { method: "DELETE" })));
+    await loadJobs();
+  } catch (e) {
+    showError("Clear all failed: " + e.message);
+  }
+});
+
 loadJobs();
 setInterval(loadJobs, 15000);

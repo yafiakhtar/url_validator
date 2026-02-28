@@ -1,30 +1,27 @@
 Project: Design an API which receives a website url and performs periodic analysis on and will notify a customer if there's an issue with the website content like photos of guns or risky keywords like guns, drugs, etc.
 
-Initial: User gives URL. That website is a web scraped for text and images. This occurs periodically/recurring. The text and images that were scraped are given to an LLM with a prompt that will let us know if it has any risky text or images. If it does, we get notified.
+Idea: User gives URL. That website is a web scraped for text and images. This occurs periodically/recurring. The text and images that were scraped are given to an LLM with a prompt that will let us know if it has any risky text or images. If it does, we get notified.
 
-1. made scrapers for static and dynamic sites (beautifulsoup and playwright)
+**Implemenation**
 
-## API usage
+1. **Scrapers for static and dynamic sites** (Beautiful Soup + Playwright)
+2. **LLM analysis** of scraped text and images to flag risky content (e.g. guns, drugs).
+3. **Webhook notifications** when risk is detected (with retries and backoff).
+4. **Scheduled runs** — each URL runs on its own interval (APScheduler).
+5. **REST API** — create/update/delete jobs, list runs, health check.
+6. **UI** — add URLs, set interval and mode, view jobs and run history.
+7. **Content hashing** — skip LLM when the page hasn’t changed since last run.
+8. **SQLite storage** — jobs, runs, and last state per job (for hashing and risk level).
 
-### Setup
-- Create a virtualenv
-- Install dependencies:
-  - `pip install -r requirements.txt`
-  - `pip install -r static/requirements.txt`
-  - `pip install -r dynamic/requirements.txt`
-- Install Playwright browsers: `playwright install`
-- Export env vars:
-  - `CLAUDE_API_KEY=...`
-  - Optional: `ANTHROPIC_MODEL=claude-3-5-sonnet-20241022`
-- Or put them in a `.env` file at the project root.
+**Tech stack**
 
-### Run
-- `uvicorn app.main:app --reload`
-
-### Endpoints
-- `POST /jobs` with `{ url, interval_seconds, mode, webhook_url }`
-- `GET /jobs`
-- `PATCH /jobs/{id}` to pause or change interval/mode/webhook
-- `POST /jobs/{id}/run` for manual trigger
-- `GET /jobs/{id}/runs`
+- **Backend:** Python 3, FastAPI, Uvicorn
+- **Scheduling:** APScheduler
+- **Scraping:** Beautiful Soup 4, Playwright
+- **LLM / analysis:** Anthropic (Claude)
+- **HTTP:** httpx, requests
+- **Data / config:** Pydantic, python-dotenv
+- **Database:** SQLite
+- **Frontend:** HTML, CSS, JavaScript
+- **Hosting:** Railway
 

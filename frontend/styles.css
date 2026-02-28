@@ -33,9 +33,11 @@
 
 * { box-sizing: border-box; }
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 15px;
-  line-height: 1.4;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
@@ -94,7 +96,7 @@ body {
   max-width: 520px;
   height: 2.75rem;
   border: 1px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--input-bg);
   overflow: hidden;
 }
@@ -168,7 +170,7 @@ body {
   border: 1px solid var(--alert-border);
   background: var(--alert-bg);
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: 0;
   margin-bottom: 1rem;
 }
 .alerts h2 { margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 500; color: var(--alert-title); }
@@ -185,7 +187,7 @@ body {
 .jobs { list-style: none; padding: 0; margin: 0; }
 .job {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
 }
@@ -202,7 +204,7 @@ body {
   cursor: pointer;
   font-family: inherit;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--input-bg);
   color: var(--text);
 }

@@ -69,15 +69,16 @@ function renderJob(job, latestRun) {
   const lastChecked = latestRun && latestRun.finished_at ? formatTimestamp(latestRun.finished_at) : "—";
   const detectedAt = latestRun && latestRun.risk_at ? formatTimestamp(latestRun.risk_at) : "";
   return `
-    <li class="job" data-job-id="${job.id}">
+    <li class="job" data-job-id="${job.id}" data-status="${job.status}">
       <div class="url">${escapeHtml(job.url)}</div>
       <div class="meta">Frequency: ${escapeHtml(intervalLabel)}</div>
-      <div class="meta">Status: ${escapeHtml(job.status)}</div>
+      <div class="meta">Status: ${escapeHtml(job.status.charAt(0).toUpperCase() + job.status.slice(1))} <span class="live-dot ${job.status === "active" ? "live-dot--active" : "live-dot--paused"}" aria-label="Live status"></span></div>
       <div class="meta">Last checked: ${escapeHtml(lastChecked)}</div>
       ${detectedAt ? `<div class="meta">Detected: ${escapeHtml(detectedAt)}</div>` : ""}
       <div class="result">${resultHtml}</div>
       <div class="actions">
         <button type="button" data-action="run">Run now</button>
+        <button type="button" data-action="toggle">${job.status === "active" ? "Stop" : "Start"}</button>
         <button type="button" data-action="delete">Delete</button>
       </div>
     </li>
@@ -146,6 +147,7 @@ async function loadJobs() {
     listEl.querySelectorAll(".job").forEach((node) => {
       const jobId = node.dataset.jobId;
       node.querySelector('[data-action="run"]').addEventListener("click", () => runNow(jobId));
+      node.querySelector('[data-action="toggle"]').addEventListener("click", () => toggleJob(jobId, node));
       node.querySelector('[data-action="delete"]').addEventListener("click", () => deleteJob(jobId));
     });
   } catch (e) {
@@ -171,6 +173,18 @@ async function deleteJob(jobId) {
     await loadJobs();
   } catch (e) {
     showError("Delete failed: " + e.message);
+  }
+}
+
+async function toggleJob(jobId, node) {
+  showError("");
+  const isActive = node.dataset.status === "active";
+  const nextStatus = isActive ? "paused" : "active";
+  try {
+    await api(`/jobs/${jobId}`, { method: "PATCH", body: { status: nextStatus } });
+    await loadJobs();
+  } catch (e) {
+    showError("Update status failed: " + e.message);
   }
 }
 

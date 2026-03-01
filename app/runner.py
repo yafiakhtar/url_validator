@@ -56,6 +56,24 @@ def run_job(job_id: str) -> Dict[str, Any]:
             last_evidence = parse_json(state_row["last_evidence"]) if state_row else []
             last_risk_at = state_row["last_risk_at"] if state_row else None
             last_summary = state_row["last_summary"] if state_row else None
+            if not last_risk_level:
+                recent = fetch_one(
+                    """
+                    SELECT site_context, risk_level, flags, evidence, risk_at, summary
+                    FROM runs
+                    WHERE job_id = ? AND status = ?
+                    ORDER BY finished_at DESC
+                    LIMIT 1
+                    """,
+                    (job_id, "success"),
+                )
+                if recent:
+                    last_site_context = recent["site_context"]
+                    last_risk_level = recent["risk_level"]
+                    last_flags = parse_json(recent["flags"]) if recent["flags"] else []
+                    last_evidence = parse_json(recent["evidence"]) if recent["evidence"] else []
+                    last_risk_at = recent["risk_at"]
+                    last_summary = recent["summary"]
             risk_level = last_risk_level or "none"
             execute(
                 """

@@ -158,5 +158,11 @@ def run_job_now(job_id: str, background_tasks: BackgroundTasks) -> dict:
     row = fetch_one("SELECT * FROM jobs WHERE id = ?", (job_id,))
     if not row:
         raise HTTPException(status_code=404, detail="Job not found")
+    running = fetch_one(
+        "SELECT id FROM runs WHERE job_id = ? AND status = ?",
+        (job_id, "running"),
+    )
+    if running:
+        return {"status": "already_running"}
     background_tasks.add_task(run_job, job_id)
     return {"status": "queued"}

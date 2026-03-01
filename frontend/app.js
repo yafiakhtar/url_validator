@@ -59,7 +59,9 @@ function renderResult(run) {
   if (risk === "none") {
     return { html: '<span class="result safe">Safe</span>', risk };
   }
-  const flags = (run.flags && run.flags.length) ? ` (${run.flags.join(", ")})` : "";
+  const flags = (run.flags && run.flags.length)
+    ? ` (${run.flags.map((flag) => flag.replace(/_/g, " ")).join(", ")})`
+    : "";
   return { html: `<span class="result risk">Risk:${flags}</span>`, risk };
 }
 
@@ -119,7 +121,9 @@ async function loadJobs() {
       jobs.map(async (job) => {
         const run = await loadRuns(job.id);
         if (run && run.risk_level && run.risk_level !== "none") {
-          const flags = (run.flags && run.flags.length) ? run.flags.join(", ") : "risk detected";
+          const flags = (run.flags && run.flags.length)
+            ? run.flags.map((flag) => flag.replace(/_/g, " ")).join(", ")
+            : "risk detected";
           alerts.push({
             url: job.url,
             flags,

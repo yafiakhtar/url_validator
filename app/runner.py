@@ -50,51 +50,59 @@ def run_job(job_id: str) -> Dict[str, Any]:
 
         if last_hash == raw_hash:
             finished_at = utc_now()
+            last_site_context = state_row["last_site_context"] if state_row else None
             last_risk_level = state_row["last_risk_level"] if state_row else None
             last_flags = parse_json(state_row["last_flags"]) if state_row else []
             last_evidence = parse_json(state_row["last_evidence"]) if state_row else []
             last_risk_at = state_row["last_risk_at"] if state_row else None
+            last_summary = state_row["last_summary"] if state_row else None
             risk_level = last_risk_level or "none"
             execute(
                 """
                 UPDATE runs
-                SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?
+                SET finished_at = ?, status = ?, site_context = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?, summary = ?
                 WHERE id = ?
                 """,
                 (
                     finished_at,
                     "success",
+                    last_site_context,
                     risk_level,
                     insert_json(last_flags or []),
                     insert_json(last_evidence or []),
                     raw_hash,
                     last_risk_at,
+                    last_summary,
                     run_id,
                 ),
             )
             return {"status": "success", "run_id": run_id, "risk_level": risk_level}
 
         analysis = analyze_content(job["url"], text_lines, images)
+        site_context = analysis.get("site_context", "")
         risk_level = analysis.get("risk_level", "none")
         flags = analysis.get("flags", [])
         evidence = analysis.get("evidence", [])
+        summary = analysis.get("summary", "")
 
         finished_at = utc_now()
         risk_at = finished_at if risk_level in ("low", "high") else None
         execute(
             """
             UPDATE runs
-            SET finished_at = ?, status = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?
+            SET finished_at = ?, status = ?, site_context = ?, risk_level = ?, flags = ?, evidence = ?, raw_hash = ?, risk_at = ?, summary = ?
             WHERE id = ?
             """,
             (
                 finished_at,
                 "success",
+                site_context,
                 risk_level,
                 insert_json(flags),
                 insert_json(evidence),
                 raw_hash,
                 risk_at,
+                summary,
                 run_id,
             ),
         )
@@ -103,31 +111,35 @@ def run_job(job_id: str) -> Dict[str, Any]:
             execute(
                 """
                 UPDATE job_state
-                SET last_hash = ?, last_risk_level = ?, last_flags = ?, last_evidence = ?, last_risk_at = ?
+                SET last_hash = ?, last_site_context = ?, last_risk_level = ?, last_flags = ?, last_evidence = ?, last_risk_at = ?, last_summary = ?
                 WHERE job_id = ?
                 """,
                 (
                     raw_hash,
+                    site_context if risk_level in ("low", "high") else None,
                     risk_level if risk_level in ("low", "high") else None,
                     insert_json(flags) if risk_level in ("low", "high") else None,
                     insert_json(evidence) if risk_level in ("low", "high") else None,
                     risk_at,
+                    summary if risk_level in ("low", "high") else None,
                     job_id,
                 ),
             )
         else:
             execute(
                 """
-                INSERT INTO job_state (job_id, last_hash, last_risk_level, last_flags, last_evidence, last_risk_at, last_notified_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO job_state (job_id, last_hash, last_site_context, last_risk_level, last_flags, last_evidence, last_risk_at, last_summary, last_notified_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     job_id,
                     raw_hash,
+                    site_context if risk_level in ("low", "high") else None,
                     risk_level if risk_level in ("low", "high") else None,
                     insert_json(flags) if risk_level in ("low", "high") else None,
                     insert_json(evidence) if risk_level in ("low", "high") else None,
                     risk_at,
+                    summary if risk_level in ("low", "high") else None,
                     None,
                 ),
             )

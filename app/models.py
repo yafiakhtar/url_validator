@@ -41,9 +41,11 @@ class RunOut(BaseModel):
     started_at: str
     finished_at: Optional[str]
     status: RunStatus
+    site_context: Optional[str]
     risk_level: Optional[RiskLevel]
     flags: Optional[list[str]]
     evidence: Optional[Any]
     raw_hash: Optional[str]
     risk_at: Optional[str]
+    summary: Optional[str]
     error: Optional[str]

@@ -68,6 +68,8 @@ function renderJob(job, latestRun) {
   const intervalLabel = frequencyLabels[job.interval_seconds] || `${job.interval_seconds}s`;
   const lastChecked = latestRun && latestRun.finished_at ? formatTimestamp(latestRun.finished_at) : "—";
   const detectedAt = latestRun && latestRun.risk_at ? formatTimestamp(latestRun.risk_at) : "";
+  const siteContext = latestRun && latestRun.site_context ? latestRun.site_context : "";
+  const summary = latestRun && latestRun.summary ? latestRun.summary : "";
   return `
     <li class="job" data-job-id="${job.id}" data-status="${job.status}">
       <div class="url">${escapeHtml(job.url)}</div>
@@ -75,6 +77,8 @@ function renderJob(job, latestRun) {
       <div class="meta">Status: ${escapeHtml(job.status.charAt(0).toUpperCase() + job.status.slice(1))} <span class="live-dot ${job.status === "active" ? "live-dot--active" : "live-dot--paused"}" aria-label="Live status"></span></div>
       <div class="meta">Last checked: ${escapeHtml(lastChecked)}</div>
       ${detectedAt ? `<div class="meta">Detected: ${escapeHtml(detectedAt)}</div>` : ""}
+      ${siteContext ? `<div class="meta">Context: ${escapeHtml(siteContext)}</div>` : ""}
+      ${summary ? `<div class="meta">Summary: ${escapeHtml(summary)}</div>` : ""}
       <div class="result">${resultHtml}</div>
       <div class="actions">
         <button type="button" data-action="run">Run now</button>
@@ -120,7 +124,9 @@ async function loadJobs() {
             url: job.url,
             flags,
             finished_at: run.finished_at || "",
-            risk_at: run.risk_at || ""
+            risk_at: run.risk_at || "",
+            site_context: run.site_context || "",
+            summary: run.summary || ""
           });
         }
         return renderJob(job, run);
@@ -134,6 +140,8 @@ async function loadJobs() {
             `<li>
               <strong>${escapeHtml(item.url)}</strong>
               <div>Flagged content: ${escapeHtml(item.flags)}</div>
+              ${item.site_context ? `<div>Context: ${escapeHtml(item.site_context)}</div>` : ""}
+              ${item.summary ? `<div>Summary: ${escapeHtml(item.summary)}</div>` : ""}
               ${item.risk_at ? `<div>Detected: ${escapeHtml(formatTimestamp(item.risk_at))}</div>` : ""}
               ${item.finished_at ? `<div>Last checked: ${escapeHtml(formatTimestamp(item.finished_at))}</div>` : ""}
             </li>`

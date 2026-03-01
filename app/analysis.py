@@ -58,11 +58,17 @@ def _collect_images(image_urls: List[str]) -> List[Dict[str, Any]]:
 
 def _build_prompt(url: str, text: str, image_urls: List[str]) -> str:
     return (
-        "Analyze the webpage content for risky content such as guns, drugs, violence, "
-        "self-harm, or other prohibited items. Return ONLY valid JSON with keys: "
-        "`risk_level` (none|low|high), `flags` (array of strings), "
-        "`evidence` (array of short objects with fields: type, snippet, rationale). "
-        "Be conservative: if unsure, set risk_level to low with a brief rationale.\n\n"
+        "You are a content safety analyst. First infer the website context (e.g., portfolio, "
+        "e-commerce, news, documentation, hobby, research, community). Then assess risk ONLY "
+        "if the content is promotional, instructional, transactional, or directly depicting "
+        "harmful items. Do NOT flag neutral mentions in academic, historical, portfolio, or "
+        "news contexts unless there is clear promotion or instruction.\n\n"
+        "Return ONLY valid JSON with keys:\n"
+        "- site_context: short string\n"
+        "- risk_level: none|low|high\n"
+        "- flags: array of strings\n"
+        "- evidence: array of objects with fields {type, snippet, rationale}\n"
+        "- summary: 1-3 sentences explaining the decision in plain language\n\n"
         f"URL: {url}\n"
         f"Image URLs (for reference): {image_urls}\n"
         f"Text:\n{text}"
@@ -102,7 +108,9 @@ def analyze_content(url: str, text_lines: List[str], image_urls: List[str]) -> D
     ).strip()
     parsed = _extract_json(raw)
     return {
+        "site_context": parsed.get("site_context", ""),
         "risk_level": parsed.get("risk_level", "none"),
         "flags": parsed.get("flags") or [],
         "evidence": parsed.get("evidence") or [],
+        "summary": parsed.get("summary", ""),
     }

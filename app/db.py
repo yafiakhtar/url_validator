@@ -38,11 +38,13 @@ def init_db() -> None:
                 started_at TEXT NOT NULL,
                 finished_at TEXT,
                 status TEXT NOT NULL,
+                site_context TEXT,
                 risk_level TEXT,
                 flags TEXT,
                 evidence TEXT,
                 raw_hash TEXT,
                 risk_at TEXT,
+                summary TEXT,
                 error TEXT,
                 FOREIGN KEY(job_id) REFERENCES jobs(id)
             );
@@ -50,20 +52,26 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS job_state (
                 job_id TEXT PRIMARY KEY,
                 last_hash TEXT,
+                last_site_context TEXT,
                 last_risk_level TEXT,
                 last_flags TEXT,
                 last_evidence TEXT,
                 last_risk_at TEXT,
+                last_summary TEXT,
                 last_notified_at TEXT,
                 FOREIGN KEY(job_id) REFERENCES jobs(id)
             );
             """
         )
         _ensure_column(conn, "runs", "risk_at", "TEXT")
+        _ensure_column(conn, "runs", "site_context", "TEXT")
+        _ensure_column(conn, "runs", "summary", "TEXT")
         _ensure_column(conn, "job_state", "last_risk_level", "TEXT")
         _ensure_column(conn, "job_state", "last_flags", "TEXT")
         _ensure_column(conn, "job_state", "last_evidence", "TEXT")
         _ensure_column(conn, "job_state", "last_risk_at", "TEXT")
+        _ensure_column(conn, "job_state", "last_site_context", "TEXT")
+        _ensure_column(conn, "job_state", "last_summary", "TEXT")
 
 
 def _connect() -> sqlite3.Connection:

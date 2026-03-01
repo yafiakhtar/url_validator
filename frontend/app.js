@@ -60,7 +60,7 @@ function renderResult(run) {
     return { html: '<span class="result safe">Safe</span>', risk };
   }
   const flags = (run.flags && run.flags.length)
-    ? ` (${run.flags.map((flag) => flag.replace(/_/g, " ")).join(", ")})`
+    ? ` (${run.flags.map((flag) => titleize(flag.replace(/_/g, " "))).join(", ")})`
     : "";
   return { html: `<span class="result risk">Risk:${flags}</span>`, risk };
 }
@@ -70,7 +70,7 @@ function renderJob(job, latestRun) {
   const intervalLabel = frequencyLabels[job.interval_seconds] || `${job.interval_seconds}s`;
   const lastChecked = latestRun && latestRun.finished_at ? formatTimestamp(latestRun.finished_at) : "—";
   const detectedAt = latestRun && latestRun.risk_at ? formatTimestamp(latestRun.risk_at) : "";
-  const siteContext = latestRun && latestRun.site_context ? latestRun.site_context : "";
+  const siteContext = latestRun && latestRun.site_context ? titleize(latestRun.site_context) : "";
   const summary = latestRun && latestRun.summary ? latestRun.summary : "";
   return `
     <li class="job" data-job-id="${job.id}" data-status="${job.status}">
@@ -104,6 +104,13 @@ function formatTimestamp(value) {
   return parsed.toLocaleString();
 }
 
+function titleize(value) {
+  return value
+    .split(" ")
+    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : ""))
+    .join(" ");
+}
+
 async function loadJobs() {
   showError("");
   const listEl = document.getElementById("jobList");
@@ -122,14 +129,14 @@ async function loadJobs() {
         const run = await loadRuns(job.id);
         if (run && run.risk_level && run.risk_level !== "none") {
           const flags = (run.flags && run.flags.length)
-            ? run.flags.map((flag) => flag.replace(/_/g, " ")).join(", ")
-            : "risk detected";
+            ? run.flags.map((flag) => titleize(flag.replace(/_/g, " "))).join(", ")
+            : "Risk detected";
           alerts.push({
             url: job.url,
             flags,
             finished_at: run.finished_at || "",
             risk_at: run.risk_at || "",
-            site_context: run.site_context || "",
+            site_context: run.site_context ? titleize(run.site_context) : "",
             summary: run.summary || ""
           });
         }

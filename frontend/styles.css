@@ -13,6 +13,9 @@
   --alert-bg: #fff5f5;
   --alert-border: #f2c0c0;
   --alert-title: #900;
+  --scrollbar-track: #f3f3f3;
+  --scrollbar-thumb: #c9c9c9;
+  --scrollbar-thumb-hover: #b5b5b5;
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }
 [data-theme="dark"] {
@@ -30,10 +33,36 @@
   --alert-bg: #2a1515;
   --alert-border: #522;
   --alert-title: #f88;
+  --scrollbar-track: #171717;
+  --scrollbar-thumb: #4a4a4a;
+  --scrollbar-thumb-hover: #606060;
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 2px solid var(--scrollbar-track);
+  border-radius: 0;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+*::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   font-size: 14px;

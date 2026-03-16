@@ -264,9 +264,10 @@ body {
   right: 1rem;
   bottom: 1rem;
   font-size: 0.8rem;
-  color: var(--text-muted);
+  font-family: inherit;
+  color: var(--text);
   text-decoration: none;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .github-link:hover {

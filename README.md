@@ -4,7 +4,8 @@
 
 **Idea:** User gives URL. That website is a web scraped for text and images. This occurs periodically/recurring. The text and images that were scraped are given to an LLM with a prompt that will let us know if it has any risky text or images. If it does, we get notified.
 
-[Image #1]
+![Demo GIF](./assets/demo.gif)
+
 
 **Implemenation**
 
@@ -119,4 +120,3 @@ Pause a job:
 ```
 .\pause_job.ps1 -JobId <JOB_ID>
 ```
-
